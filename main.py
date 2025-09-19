@@ -77,6 +77,7 @@ class card:
                 side += self.phonetic
                 side += "<br>"
             if 'synonyms' in i:
+                rule = 0
                 side += "<br>Synonyms:<br>"
                 for j in self.parts_of_speech:
                     tmp = []
@@ -87,6 +88,7 @@ class card:
                         num = len(tmp)
                     if (tmp == []):
                         continue
+                    rule = 1
                     side += j.name + ': '
                     for m in range(num):
                         if ("-ru" in i):
@@ -104,6 +106,8 @@ class card:
                         if (m != num - 1):
                             side += ", "
                     side += "<br>"
+                if (rule == 0):
+                    side += "Sry, there are no synonyms"
             if ('definitions' in i):
                 side += "<br>Definitions:<br>"
                 for j in self.parts_of_speech:
@@ -112,6 +116,17 @@ class card:
                         side += j.name + ": " + trans_to_rus(k.name) + "<br>"
                     else:
                         side += j.name + ": " + k.name + "<br>"
+
+            if ('example' in i):
+                side += "<br>Exampoles:<br>"
+                for j in self.parts_of_speech:
+                    k = j.definitions[0]
+                    if k.example == '':
+                        continue
+                    if ("-ru" in i):
+                        side += j.name + ": " + trans_to_rus(k.example) + "<br>"
+                    else:
+                        side += j.name + ": " + k.example + "<br>"
         return side
 
 
@@ -130,7 +145,7 @@ class card:
         with open(file_name, "a", encoding = "UTF-8") as f:
             f.write(front_side.replace(";", ",")+";"+back_side.replace(";", ",")+"\n")
             f.close
-        print("Front side: "+front_side +"\nBack side: "+ back_side)
+        #print("Front side: "+front_side +"\nBack side: "+ back_side)
 
         
 def get_val(inp):
@@ -215,9 +230,10 @@ def parse_word(hello):
         parts_of_speech.append(tmp)
     out.parts_of_speech = parts_of_speech
     return out
-def main():
-    # getting config
 
+def main():
+
+    # getting config
     argv_ = sys.argv
     file_config = 'example_input.txt'
     file_name = ''
@@ -249,8 +265,11 @@ def main():
     deck = []
     correct = 0
     not_found = []
+    c = 0
     for i in arr:
         card_ = parse_word(i[:-1])
+        c+=1
+        print(f"Parse: {c}")
         if (card_ == 0):
             not_found.append(i)
             continue
@@ -271,9 +290,13 @@ def main():
     with open(file_name, "w", encoding = "UTF-8") as f:
         f.write("")
         f.close
-
+    c = 0
     for i in deck:
+
         i.create_sides(front_config, back_config, file_name)
+        c+=1
+        print(f"Done: {c}/{len(deck)}")
+
 
 if __name__ == "__main__":
     main()
